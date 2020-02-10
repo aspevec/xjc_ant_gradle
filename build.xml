@@ -1,0 +1,103 @@
+<project name="AntJavaProject" default="main" basedir=".">
+    <description>
+        Create a Java Project (JAR) with Ant build script
+    </description>
+
+    <property name="projectName" value="XJC Test" />
+		<property name="gensrc" location="gensrc" />
+    <property name="resources" location="resources" />
+
+    <!-- JAXB libraries - version 2.2.11 -->
+    <property name="jaxb.lib.new" location="lib_new" />
+
+    <!-- JAXB libraries - version 2.2.1.1 -->
+    <property name="jaxb.lib.old" location="lib_old" />
+
+    <target name="clean" description="clean up">
+        <delete dir="${gensrc}" />
+    </target>
+
+    <!-- Default, run this -->
+    <target name="main" depends="clean" />
+
+    <!-- Running XJC with old library -->
+    <taskdef name="xjc_old" classname="com.sun.tools.xjc.XJCTask">
+        <classpath>
+            <fileset dir="${jaxb.lib.old}">
+                <include name="**/*.jar" />
+            </fileset>
+        </classpath>
+    </taskdef>
+
+    <macrodef name="generate_from_xsd_old">
+        <sequential>
+            <mkdir dir="gensrc" />
+
+            <echo>Generating with old JAXB</echo>
+            <xjc_old schema="${resources}/example.xsd"
+                     package="com.example"
+                     destdir="${gensrc}">
+                <produces dir="${gensrc}">
+                    <include name="*.java" />
+                </produces>
+                <depends file="${resources}/example.xsd" />
+            </xjc_old>
+
+            <echo>Replace</echo>
+            <replace dir="${gensrc}">
+                <include name="**/ObjectFactory.java" />
+                <replacetoken>
+                    <![CDATA[public ObjectFactory() {]]>
+                </replacetoken>
+                <replacevalue>
+                    <![CDATA[public ObjectFactory() { // empty constructor]]>
+                </replacevalue>
+            </replace>
+        </sequential>
+    </macrodef>
+
+    <target name="generate_old">
+        <generate_from_xsd_old />
+    </target>
+
+    <!-- Running XJC with new library -->
+    <taskdef name="xjc_new" classname="com.sun.tools.xjc.XJCTask">
+        <classpath>
+            <fileset dir="${jaxb.lib.new}">
+                <include name="**/*.jar" />
+            </fileset>
+        </classpath>
+    </taskdef>
+
+    <macrodef name="generate_from_xsd_new">
+        <sequential>
+            <mkdir dir="gensrc" />
+
+            <echo>Generating with new JAXB</echo>
+            <xjc_new schema="${resources}/example.xsd"
+                     package="com.example"
+                     destdir="${gensrc}">
+                <produces dir="${gensrc}">
+                    <include name="*.java" />
+                </produces>
+                <depends file="${resources}/example.xsd" />
+            </xjc_new>
+
+            <echo>Replace</echo>
+            <replace dir="${gensrc}">
+                <include name="**/ObjectFactory.java" />
+                <replacetoken>
+                    <![CDATA[public ObjectFactory() {]]>
+                </replacetoken>
+                <replacevalue>
+                    <![CDATA[public ObjectFactory() { // empty constructor]]>
+                </replacevalue>
+            </replace>
+        </sequential>
+    </macrodef>
+
+    <target name="generate_new">
+        <generate_from_xsd_new />
+    </target>
+
+</project>

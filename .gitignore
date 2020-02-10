@@ -1,0 +1,7 @@
+gensrc/
+##############################
+# Gradle
+##############################
+build/
+.gradle/
+!gradle-wrapper.jar
